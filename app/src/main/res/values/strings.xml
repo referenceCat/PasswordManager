@@ -1,4 +1,6 @@
 <resources>
-    <string name="app_name">PasswordManager</string>
+    <string name="app_name">Password Manager</string>
     <string name="back_button">Back</string>
+    <string name="enterPasswordRequest">Enter master-password:</string>
+    <string name="enter">Enter</string>
 </resources>
