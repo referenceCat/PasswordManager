@@ -43,16 +43,16 @@ val passwordTextStyle = TextStyle(
 const val passwordMaskChar = '*'
 
 @Composable
-fun PasswordTextField(visible: Boolean, modifier: Modifier = Modifier, label: String, editable: Boolean = true) {
-    var password by rememberSaveable { mutableStateOf("") }
+fun PasswordTextField(visible: Boolean, modifier: Modifier = Modifier, label: String, editable: Boolean = true, value: String = "", onChange: (String) -> Unit = {}) {
+    // var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(visible) }
 
     TextField(
-        value = password,
-        onValueChange = { password = it },
+        value = value,
+        onValueChange = { onChange(it)},
         label = { Text(label) },
         singleLine = true,
-        placeholder = { Text(label) },
+        // placeholder = { Text(label) },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(passwordMaskChar),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {

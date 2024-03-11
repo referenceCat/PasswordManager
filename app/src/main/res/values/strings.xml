@@ -10,4 +10,6 @@
     <string name="entryWebsite">Website:</string>
     <string name="entryPassword">Password:</string>
     <string name="defaultPassword">default1234</string>
+    <string name="errorPasswordsAreNotEqual">Passwords aren\'t equal</string>
+    <string name="errorPasswordIsTooShort">Password is too short</string>
 </resources>
