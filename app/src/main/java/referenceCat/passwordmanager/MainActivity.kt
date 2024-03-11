@@ -45,6 +45,7 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
+import referenceCat.passwordmanager.ui.FirstEntryScreen
 import referenceCat.passwordmanager.ui.LoginScreen
 
 class MainActivity : ComponentActivity() {
@@ -70,7 +71,7 @@ fun Application () {
             )
         }
     ) {
-        innerPadding -> LoginScreen(modifier = Modifier.padding(innerPadding))
+        innerPadding -> FirstEntryScreen(modifier = Modifier.padding(innerPadding))
     }
 
 }

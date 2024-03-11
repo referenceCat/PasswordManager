@@ -25,9 +25,12 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Preview
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier) {
+fun FirstEntryScreen(modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
-        Text(stringResource(id = R.string.enterMasterPassword))
+        Text(stringResource(id = R.string.createMasterPasswordDescription))
+        Text(stringResource(id = R.string.createMasterPassword))
+        PasswordTextField()
+        Text(stringResource(id = R.string.createMasterPassword))
         PasswordTextField()
         Button(content = {Text(stringResource(id = R.string.enter))}, onClick = {})
 
