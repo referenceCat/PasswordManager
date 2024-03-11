@@ -6,4 +6,8 @@
     <string name="createMasterPassword">Create master-password:</string>
     <string name="repeatMasterPassword">Repeat master-password:</string>
     <string name="enter">Enter</string>
+    <string name="entryName">Name:</string>
+    <string name="entryWebsite">Website:</string>
+    <string name="entryPassword">Password:</string>
+    <string name="defaultPassword">default1234</string>
 </resources>
