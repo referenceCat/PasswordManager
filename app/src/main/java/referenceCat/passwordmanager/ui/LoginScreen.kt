@@ -32,8 +32,8 @@ import referenceCat.passwordmanager.backend.PasswordsStorage
 @Preview
 @Composable
 fun LoginScreen(modifier: Modifier = Modifier, onSuccessfulLogin: () -> Unit = {}) {
-    var password by remember { mutableStateOf("") }
-    var errorMessageText by remember {
+    var password by rememberSaveable { mutableStateOf("") }
+    var errorMessageText by rememberSaveable {
         mutableStateOf("")
     }
     val context = LocalContext.current

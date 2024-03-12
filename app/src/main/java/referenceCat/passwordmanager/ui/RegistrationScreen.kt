@@ -12,6 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
@@ -21,15 +22,15 @@ import referenceCat.passwordmanager.backend.PasswordsStorage
 @Preview
 @Composable
 fun RegistrationScreen(modifier: Modifier = Modifier, onSuccessfulRegistration: () -> Unit = {}) {
-    var password1 by remember {
+    var password1 by rememberSaveable {
         mutableStateOf("")
     }
 
-    var password2 by remember {
+    var password2 by rememberSaveable {
         mutableStateOf("")
     }
 
-    var errorMessageText by remember {
+    var errorMessageText by rememberSaveable {
         mutableStateOf("")
     }
 
