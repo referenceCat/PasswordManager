@@ -12,4 +12,6 @@
     <string name="defaultPassword">default1234</string>
     <string name="errorPasswordsAreNotEqual">Passwords aren\'t equal</string>
     <string name="errorPasswordIsTooShort">Password is too short</string>
+    <string name="key_master_passoword_digest">key_master_passoword_digest</string>
+    <string name="errorPasswordInit">Couldn\'t initialize master-password</string>
 </resources>

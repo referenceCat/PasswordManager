@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
+import referenceCat.passwordmanager.backend.PasswordsStorage
 
 @Preview
 @Composable
@@ -59,7 +60,11 @@ fun RegistrationScreen(modifier: Modifier = Modifier, onSuccessfulRegistration: 
 
 fun tryRegister(context: Context, onSuccessfulRegistration: () -> Unit, password1: String, password2: String): String? {
     if (password1.length < 8) return context.resources.getString(R.string.errorPasswordIsTooShort)
-    else if (password1 != password2) return return context.resources.getString(R.string.errorPasswordsAreNotEqual)
-    else onSuccessfulRegistration()
+    else if (password1 != password2)  return context.resources.getString(R.string.errorPasswordsAreNotEqual)
+    else {
+        val result = PasswordsStorage().initMasterPassword(context, password1)
+        if (result != null) return result
+        onSuccessfulRegistration()
+    }
     return null
 }
