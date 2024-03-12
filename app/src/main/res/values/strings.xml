@@ -14,4 +14,6 @@
     <string name="errorPasswordIsTooShort">Password is too short</string>
     <string name="key_master_passoword_digest">key_master_passoword_digest</string>
     <string name="errorPasswordInit">Couldn\'t initialize master-password</string>
+    <string name="save">Save</string>
+    <string name="errorInvalidFieldValue">One or more fields are invalid</string>
 </resources>

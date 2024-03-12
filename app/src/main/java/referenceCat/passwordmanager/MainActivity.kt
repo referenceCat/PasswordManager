@@ -61,7 +61,7 @@ fun Application (navController: NavHostController = rememberNavController()) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     navController.enableOnBackPressed(false)
     val currentScreen = Screen.valueOf(
-        backStackEntry?.destination?.route ?: if (PasswordsStorage().isMasterPasswordInitiated(LocalContext.current)) Screen.LoginRoute.name else Screen.RegistrationRoute.name,
+        backStackEntry?.destination?.route ?: if (PasswordsStorage.getInstance().isMasterPasswordInitiated(LocalContext.current)) Screen.LoginRoute.name else Screen.RegistrationRoute.name,
     )
 
     Scaffold(
@@ -76,7 +76,7 @@ fun Application (navController: NavHostController = rememberNavController()) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = if (PasswordsStorage().isMasterPasswordInitiated(LocalContext.current)) Screen.LoginRoute.name else Screen.RegistrationRoute.name,
+            startDestination = if (PasswordsStorage.getInstance().isMasterPasswordInitiated(LocalContext.current)) Screen.LoginRoute.name else Screen.RegistrationRoute.name,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = Screen.RegistrationRoute.name) {
@@ -89,7 +89,7 @@ fun Application (navController: NavHostController = rememberNavController()) {
 
             composable(route = Screen.ListRoute.name) {
 
-                // u cant get back to login or register screen
+                // user cant get back to login or register screen
                 // TODO user need to log in back after this
                 val activity = (LocalContext.current as? Activity)
                 BackHandler(true) {

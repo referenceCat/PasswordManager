@@ -63,7 +63,7 @@ fun tryRegister(context: Context, onSuccessfulRegistration: () -> Unit, password
     if (password1.length < 8) return context.resources.getString(R.string.errorPasswordIsTooShort)
     else if (password1 != password2)  return context.resources.getString(R.string.errorPasswordsAreNotEqual)
     else {
-        val result = PasswordsStorage().initMasterPassword(context, password1)
+        val result = PasswordsStorage.getInstance().initMasterPassword(context, password1)
         if (result != null) return result
         onSuccessfulRegistration()
     }
