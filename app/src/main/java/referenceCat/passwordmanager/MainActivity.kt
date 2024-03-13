@@ -33,6 +33,7 @@ import referenceCat.passwordmanager.backend.PasswordsStorage
 import referenceCat.passwordmanager.ui.EntryEditScreen
 import referenceCat.passwordmanager.ui.ListScreen
 import referenceCat.passwordmanager.ui.LoginScreen
+import referenceCat.passwordmanager.ui.PasswordsListViewModel
 import referenceCat.passwordmanager.ui.RegistrationScreen
 
 enum class Screen(

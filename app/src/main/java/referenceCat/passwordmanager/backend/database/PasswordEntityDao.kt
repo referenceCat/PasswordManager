@@ -22,6 +22,6 @@ abstract class PasswordEntityDao {
     @Query("SELECT * from passwords WHERE id = :id")
     abstract fun getItem(id: Int): Flow<PasswordEntity>
 
-    @Query("SELECT * from passwords ORDER BY name ASC")
+    @Query("SELECT * from passwords")
     abstract fun getAllItems(): Flow<List<PasswordEntity>>
 }

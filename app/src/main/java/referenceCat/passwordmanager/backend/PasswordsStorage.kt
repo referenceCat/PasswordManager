@@ -3,6 +3,8 @@ package referenceCat.passwordmanager.backend
 import android.content.Context
 import android.util.Base64
 import android.util.Log
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import referenceCat.passwordmanager.R
 import referenceCat.passwordmanager.backend.database.OfflinePasswordsRepository
 import referenceCat.passwordmanager.backend.database.PasswordEntity
@@ -43,6 +45,7 @@ class PasswordsStorage private constructor() {
     private val decryptedPasswordsData: MutableList<DecryptedPasswordData> = mutableListOf()
 
     private val tag = "referenceCat.passwordmanager.cryptography"
+
     init {
         if (instance == null) {
             instance = this
@@ -51,7 +54,8 @@ class PasswordsStorage private constructor() {
 
 
     private fun generateEncryptionKey(password: String) {
-        val pbKeySpec = PBEKeySpec(password.toCharArray(), stringToByteArray("encryption key salt"), 1324, 256)
+        val pbKeySpec =
+            PBEKeySpec(password.toCharArray(), stringToByteArray("encryption key salt"), 1324, 256)
         val secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
         val keyBytes = secretKeyFactory.generateSecret(pbKeySpec).encoded
         keySpec = SecretKeySpec(keyBytes, "AES")
@@ -71,6 +75,7 @@ class PasswordsStorage private constructor() {
         // Log.d(tag, "bytes: ${encryptedTextBytes.contentToString()}, iv: ${ivBytes.contentToString()}")
         return Pair(encryptedText, iv)
     }
+
     private fun decrypt(cipherText: String, initVector: String): String {
         assert(keySpec != null) { "can't decrypt without key" }
         // Log.d(tag, "decrypt: $cipherText, iv: $initVector")
@@ -87,7 +92,7 @@ class PasswordsStorage private constructor() {
         return decryptedText
     }
 
-    private fun digestMessage(input:String): String {
+    private fun digestMessage(input: String): String {
         val md = MessageDigest.getInstance("SHA-256")
         return byteArrayToString(md.digest(stringToByteArray(input)))
     }
@@ -104,9 +109,15 @@ class PasswordsStorage private constructor() {
     }
 
     fun isMasterPasswordInitiated(context: Context): Boolean {
-        val sharedPref = context.getSharedPreferences(context.resources.getString(R.string.key_master_passoword_digest), Context.MODE_PRIVATE)
+        val sharedPref = context.getSharedPreferences(
+            context.resources.getString(R.string.key_master_passoword_digest),
+            Context.MODE_PRIVATE
+        )
 
-        sharedPref.getString(context.resources.getString(R.string.key_master_passoword_digest), null) ?: return false
+        sharedPref.getString(
+            context.resources.getString(R.string.key_master_passoword_digest),
+            null
+        ) ?: return false
         return true
 
     }
@@ -114,8 +125,14 @@ class PasswordsStorage private constructor() {
     fun applyMasterPassword(context: Context, password: String): String? {
         if (!isMasterPasswordInitiated(context)) return "Master-password isn't initiated"
 
-        val sharedPref = context.getSharedPreferences(context.resources.getString(R.string.key_master_passoword_digest), Context.MODE_PRIVATE)
-        val passwordDigestOnDisk: String = sharedPref.getString(context.resources.getString(R.string.key_master_passoword_digest), null) ?: return "Master-password isn't initiated"
+        val sharedPref = context.getSharedPreferences(
+            context.resources.getString(R.string.key_master_passoword_digest),
+            Context.MODE_PRIVATE
+        )
+        val passwordDigestOnDisk: String = sharedPref.getString(
+            context.resources.getString(R.string.key_master_passoword_digest),
+            null
+        ) ?: return "Master-password isn't initiated"
 
         val passwordDigestFromUser = digestMessage(password)
 
@@ -124,27 +141,36 @@ class PasswordsStorage private constructor() {
         return null
     }
 
-    fun initMasterPassword(context: Context, password: String): String?  {
+    fun initMasterPassword(context: Context, password: String): String? {
         if (isMasterPasswordInitiated(context)) return "Master-password is already initiated"
-        val sharedPref = context.getSharedPreferences(context.resources.getString(R.string.key_master_passoword_digest), Context.MODE_PRIVATE)
+        val sharedPref = context.getSharedPreferences(
+            context.resources.getString(R.string.key_master_passoword_digest),
+            Context.MODE_PRIVATE
+        )
 
-        with (sharedPref.edit()) {
-            putString(context.resources.getString(R.string.key_master_passoword_digest), digestMessage(password))
+        with(sharedPref.edit()) {
+            putString(
+                context.resources.getString(R.string.key_master_passoword_digest),
+                digestMessage(password)
+            )
             commit()
         }
         generateEncryptionKey(password)
         return null
     }
 
-    suspend fun savePassword(context: Context, name: String, website: String, password: String){
-        val repository: PasswordsRepository = OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
+    suspend fun savePassword(context: Context, name: String, website: String, password: String) {
+        val repository: PasswordsRepository =
+            OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
         val (encryptedPassword, initVector) = encrypt(password)
         repository.insertItem(PasswordEntity(0, name, website, encryptedPassword, initVector))
     }
 
     suspend fun updateData(context: Context) {
+        Log.d(null, "updating 1 password storage data. size =  ${decryptedPasswordsData.size}")
         decryptedPasswordsData.clear()
-        val repository: PasswordsRepository = OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
+        val repository: PasswordsRepository =
+            OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
         repository.getAllItemsStream().collect { entities ->
             entities.forEach {
                 decryptedPasswordsData.add(
@@ -157,9 +183,26 @@ class PasswordsStorage private constructor() {
                 )
             }
         }
+        Log.d(null, "updating 2 password storage data. size =  ${decryptedPasswordsData.size}")
     }
 
     fun getData(): List<DecryptedPasswordData> {
+        Log.d(null, "getting password storage data. size =  ${decryptedPasswordsData.size}")
         return decryptedPasswordsData.toList()
+    }
+
+    fun getAllPasswords(context: Context): Flow<List<DecryptedPasswordData>> {
+        val repository: PasswordsRepository =
+            OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
+        return repository.getAllItemsStream().map { entities ->
+            entities.map {
+                DecryptedPasswordData(
+                    it.id,
+                    it.name,
+                    it.website,
+                    decrypt(it.encryptedPassword, it.initVector)
+                )
+            }
+        }
     }
 }

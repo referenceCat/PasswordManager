@@ -2,6 +2,7 @@ package referenceCat.passwordmanager.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -45,25 +47,24 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
 import kotlinx.coroutines.launch
 import referenceCat.passwordmanager.backend.DecryptedPasswordData
 import referenceCat.passwordmanager.backend.PasswordsStorage
+import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
-@SuppressLint("CoroutineCreationDuringComposition")
-@Preview
 @Composable
 fun ListScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> Unit = {}, onActionButtonClick: () -> Unit = {}) {
-    var data: List<DecryptedPasswordData> by rememberSaveable {
-        mutableStateOf(PasswordsStorage.getInstance().getData())
-    }
+    val passwordsListViewModel = viewModel<PasswordsListViewModel>()
 
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
-    coroutineScope.launch {
-        PasswordsStorage.getInstance().updateData(context)
-        data = PasswordsStorage.getInstance().getData()
-    } // TODO
 
+    val dataList: List<DecryptedPasswordData> by passwordsListViewModel.passwords.observeAsState(
+        initial = listOf()
+    )
+
+    Log.d(null, dataList.size.toString())
 
     Scaffold(modifier = modifier,
         floatingActionButton = {
@@ -74,11 +75,11 @@ fun ListScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> Unit = {
         )
     }
     }) {
-        innerPadding -> innerPadding // Scaffold doesn't have any padding but value must be used somewhere
+        innerPadding -> innerPadding// Scaffold doesn't have any padding but value must be used somewhere
 
         LazyColumn() {
-            items(data.size) {
-                val item = data.get(index = it)
+            items(dataList.size) {
+                val item = dataList.get(index = it) // TODOs
                 EntryItem(modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp),
                     onClick = onItemClick,
                     id = item.id,
