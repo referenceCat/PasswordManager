@@ -1,4 +1,4 @@
-package referenceCat.passwordmanager.backend.data
+package referenceCat.passwordmanager.backend.database
 import kotlinx.coroutines.flow.Flow
 
 class OfflinePasswordsRepository(private val itemDao: PasswordEntityDao) : PasswordsRepository {

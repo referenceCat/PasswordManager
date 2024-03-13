@@ -1,4 +1,4 @@
-package referenceCat.passwordmanager.backend.data
+package referenceCat.passwordmanager.backend.database
 
 import android.content.Context
 import androidx.room.Database

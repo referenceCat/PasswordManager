@@ -1,4 +1,4 @@
-package referenceCat.passwordmanager.backend.data
+package referenceCat.passwordmanager.backend.database
 
 import androidx.room.Dao
 import androidx.room.Delete
