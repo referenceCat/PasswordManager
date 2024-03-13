@@ -19,9 +19,12 @@ abstract class PasswordEntityDao {
     @Delete
     abstract suspend fun delete(passwordEntity: PasswordEntity)
 
-    @Query("SELECT * from passwords WHERE id = :id")
+    @Query("DELETE FROM passwords WHERE id = :id")
+    abstract fun deleteById(id: Int)
+
+    @Query("SELECT * FROM passwords WHERE id = :id")
     abstract fun getItem(id: Int): Flow<PasswordEntity>
 
-    @Query("SELECT * from passwords")
+    @Query("SELECT * FROM passwords")
     abstract fun getAllItems(): Flow<List<PasswordEntity>>
 }

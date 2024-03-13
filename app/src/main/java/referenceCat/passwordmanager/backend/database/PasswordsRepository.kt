@@ -30,4 +30,6 @@ interface PasswordsRepository {
      * Update item in the data source
      */
     suspend fun updateItem(item: PasswordEntity)
+
+    suspend fun deleteById(id: Int)
 }

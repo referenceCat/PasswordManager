@@ -1,8 +1,6 @@
 package referenceCat.passwordmanager.backend
 
 import android.content.Context
-import android.util.Base64
-import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import referenceCat.passwordmanager.R
@@ -10,7 +8,6 @@ import referenceCat.passwordmanager.backend.database.OfflinePasswordsRepository
 import referenceCat.passwordmanager.backend.database.PasswordEntity
 import referenceCat.passwordmanager.backend.database.PasswordsDatabase
 import referenceCat.passwordmanager.backend.database.PasswordsRepository
-import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import javax.crypto.Cipher
@@ -159,38 +156,6 @@ class PasswordsStorage private constructor() {
         return null
     }
 
-    suspend fun savePassword(context: Context, name: String, website: String, password: String) {
-        val repository: PasswordsRepository =
-            OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
-        val (encryptedPassword, initVector) = encrypt(password)
-        repository.insertItem(PasswordEntity(0, name, website, encryptedPassword, initVector))
-    }
-
-    suspend fun updateData(context: Context) {
-        Log.d(null, "updating 1 password storage data. size =  ${decryptedPasswordsData.size}")
-        decryptedPasswordsData.clear()
-        val repository: PasswordsRepository =
-            OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
-        repository.getAllItemsStream().collect { entities ->
-            entities.forEach {
-                decryptedPasswordsData.add(
-                    DecryptedPasswordData(
-                        it.id,
-                        it.name,
-                        it.website,
-                        decrypt(it.encryptedPassword, it.initVector)
-                    )
-                )
-            }
-        }
-        Log.d(null, "updating 2 password storage data. size =  ${decryptedPasswordsData.size}")
-    }
-
-    fun getData(): List<DecryptedPasswordData> {
-        Log.d(null, "getting password storage data. size =  ${decryptedPasswordsData.size}")
-        return decryptedPasswordsData.toList()
-    }
-
     fun getAllPasswords(context: Context): Flow<List<DecryptedPasswordData>> {
         val repository: PasswordsRepository =
             OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
@@ -204,5 +169,24 @@ class PasswordsStorage private constructor() {
                 )
             }
         }
+    }
+
+    suspend fun insertPasswordData(context: Context, name: String, website: String, password: String) {
+        val repository: PasswordsRepository =
+            OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
+        val (encryptedPassword, initVector) = encrypt(password)
+        repository.insertItem(PasswordEntity(0, name, website, encryptedPassword, initVector))
+    }
+
+    suspend fun deletePasswordData(context: Context, id: Int) {
+        val repository: PasswordsRepository = OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
+        repository.deleteById(id)
+    }
+
+    suspend fun updatePasswordData(context: Context, name: String, website: String, password: String) {
+        val repository: PasswordsRepository =
+            OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
+        val (encryptedPassword, initVector) = encrypt(password)
+        repository.updateItem(PasswordEntity(0, name, website, encryptedPassword, initVector))
     }
 }

@@ -1,70 +1,69 @@
 package referenceCat.passwordmanager.ui
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.util.Log
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import referenceCat.passwordmanager.R
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
-import kotlinx.coroutines.launch
 import referenceCat.passwordmanager.backend.DecryptedPasswordData
-import referenceCat.passwordmanager.backend.PasswordsStorage
-import androidx.activity.viewModels
-import androidx.lifecycle.ViewModel
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.w3c.dom.Text
+import referenceCat.passwordmanager.backend.PasswordsStorage
+import kotlin.coroutines.CoroutineContext
 
 @Composable
 fun ListScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> Unit = {}, onActionButtonClick: () -> Unit = {}) {
-    val passwordsListViewModel = viewModel<PasswordsListViewModel>()
+    val listScreenViewModel = viewModel<ListScreenViewModel>()
 
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-    val dataList: List<DecryptedPasswordData> by passwordsListViewModel.passwords.observeAsState(
+    val dataList: List<DecryptedPasswordData> by listScreenViewModel.passwords.observeAsState(
         initial = listOf()
     )
 
-    Log.d(null, dataList.size.toString())
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+    var intIdToDialog by rememberSaveable { mutableIntStateOf(0) }
+    if (showDialog) {
+        ConfirmCancelDialog(
+            onDismissRequest = {showDialog = false},
+            onConfirmation = {
+                coroutineScope.launch(Dispatchers.IO) {PasswordsStorage.getInstance().deletePasswordData(context, intIdToDialog)}
+                             showDialog = false
+                             },
+            dialogTitle = "Delete password data?",
+            dialogText = "Password data deletion is irreversible action",
+            icon = Icons.Filled.Delete
+        )
+    }
 
     Scaffold(modifier = modifier,
         floatingActionButton = {
@@ -78,6 +77,7 @@ fun ListScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> Unit = {
         innerPadding -> innerPadding// Scaffold doesn't have any padding but value must be used somewhere
 
         LazyColumn() {
+            if (dataList.isEmpty()) item() {Text("Password data will be displayed here")}
             items(dataList.size) {
                 val item = dataList.get(index = it) // TODOs
                 EntryItem(modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp),
@@ -85,7 +85,11 @@ fun ListScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> Unit = {
                     id = item.id,
                     name = item.name,
                     website = item.website,
-                    password = item.password)
+                    password = item.password,
+                    onDeleteClick = {
+                        showDialog = true
+                        intIdToDialog = item.id
+                    })
             }
 
         }
@@ -98,7 +102,10 @@ fun EntryItem(modifier: Modifier = Modifier,
               website: String,
               name: String,
               onClick: (id: Int) -> Unit = {},
+              onDeleteClick: (id: Int) -> Unit = {},
+              onEditClick: (id: Int) -> Unit = {},
               id: Int) {
+
     Card(modifier = modifier
         .fillMaxWidth(1f)
         .padding(3.dp)){
@@ -106,14 +113,14 @@ fun EntryItem(modifier: Modifier = Modifier,
         Text(website, modifier = Modifier.padding(5.dp))
         PasswordText(modifier = Modifier.padding(5.dp), visible = false, text = password)
 
-        IconButton(onClick = { onClick(id) }) {
+        IconButton(onClick = { onEditClick(id) }) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.baseline_edit_24),
                 contentDescription = "Edit"
             )
         }
 
-        IconButton(onClick = {}) {
+        IconButton(onClick = { onDeleteClick(id) }) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.baseline_delete_24),
                 contentDescription = "Delete"
@@ -131,4 +138,46 @@ fun EntryItemPreview(modifier: Modifier = Modifier,
               onClick: (id: Int) -> Unit = {},
               id: Int = 0) {
     EntryItem(password = password, website = website, name = name, id = 0, onClick = onClick)
+}
+
+@Composable
+fun ConfirmCancelDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String,
+    dialogText: String,
+    icon: ImageVector,
+) {
+    AlertDialog(
+        icon = {
+            Icon(icon, contentDescription = "Example Icon")
+        },
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {
+            Text(text = dialogText)
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text("Dismiss")
+            }
+        }
+    )
 }

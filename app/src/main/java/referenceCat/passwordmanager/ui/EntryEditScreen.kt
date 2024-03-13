@@ -1,10 +1,7 @@
 package referenceCat.passwordmanager.ui
 
 import android.content.Context
-import android.provider.ContactsContract.CommonDataKinds.Website
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -64,7 +61,7 @@ suspend fun savePassword(context: Context, name: String, website: String, passwo
         return context.resources.getString(R.string.errorInvalidFieldValue)
     }
 
-    PasswordsStorage.getInstance().savePassword(context, name, website, password)
+    PasswordsStorage.getInstance().insertPasswordData(context, name, website, password)
     onSave()
     return null
 }
