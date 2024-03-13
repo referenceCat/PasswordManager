@@ -100,7 +100,7 @@ fun Application (navController: NavHostController = rememberNavController()) {
             }
 
             composable(route = Screen.EntryEditRoute.name) {
-                EntryEditScreen()
+                EntryEditScreen(onSave = {navController.navigate(Screen.ListRoute.name)})
             }
         }
 
