@@ -183,10 +183,10 @@ class PasswordsStorage private constructor() {
         repository.deleteById(id)
     }
 
-    suspend fun updatePasswordData(context: Context, name: String, website: String, password: String) {
+    suspend fun updatePasswordData(context: Context, id: Int, name: String, website: String, password: String) {
         val repository: PasswordsRepository =
             OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
         val (encryptedPassword, initVector) = encrypt(password)
-        repository.updateItem(PasswordEntity(0, name, website, encryptedPassword, initVector))
+        repository.updateItem(PasswordEntity(id, name, website, encryptedPassword, initVector))
     }
 }

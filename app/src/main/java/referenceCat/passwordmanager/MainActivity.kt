@@ -23,13 +23,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import referenceCat.passwordmanager.backend.PasswordsStorage
-import referenceCat.passwordmanager.ui.EntryEditScreen
+import referenceCat.passwordmanager.ui.EditScreen
+import referenceCat.passwordmanager.ui.EditScreenInitContentViewModel
 import referenceCat.passwordmanager.ui.ListScreen
 import referenceCat.passwordmanager.ui.LoginScreen
 import referenceCat.passwordmanager.ui.RegistrationScreen
@@ -49,7 +51,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
-                referenceCat.passwordmanager.Application()
+                Application()
         }
     }
 }
@@ -57,6 +59,7 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun Application (navController: NavHostController = rememberNavController()) {
+    val editScreenInitContentViewModel = viewModel<EditScreenInitContentViewModel>()
     val backStackEntry by navController.currentBackStackEntryAsState()
     navController.enableOnBackPressed(false)
     val currentScreen = Screen.valueOf(
@@ -95,12 +98,25 @@ fun Application (navController: NavHostController = rememberNavController()) {
                     activity?.finish()
                 }
 
-                ListScreen(onItemClick = {navController.navigate(Screen.EntryEditRoute.name)},
-                    onActionButtonClick = {navController.navigate(Screen.EntryEditRoute.name)})
+                ListScreen(
+                    onActionButtonClick = {
+                        editScreenInitContentViewModel.clearData()
+                        navController.navigate(Screen.EntryEditRoute.name)
+                                          },
+                    onEditClick = {
+                        id: Int, name: String, website: String, password: String ->
+                        editScreenInitContentViewModel.setData(id, name, website, password)
+                        navController.navigate(Screen.EntryEditRoute.name)
+                    }
+                )
             }
 
             composable(route = Screen.EntryEditRoute.name) {
-                EntryEditScreen(onSave = {navController.navigate(Screen.ListRoute.name)})
+                EditScreen(id = editScreenInitContentViewModel.id.intValue,
+                    name = editScreenInitContentViewModel.name.value,
+                    website = editScreenInitContentViewModel.website.value,
+                    password = editScreenInitContentViewModel.password.value,
+                    onSave = {navController.navigate(Screen.ListRoute.name)})
             }
         }
 

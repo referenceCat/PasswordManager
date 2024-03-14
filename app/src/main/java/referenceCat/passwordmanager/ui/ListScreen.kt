@@ -40,7 +40,7 @@ import referenceCat.passwordmanager.backend.PasswordsStorage
 import kotlin.coroutines.CoroutineContext
 
 @Composable
-fun ListScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> Unit = {}, onActionButtonClick: () -> Unit = {}) {
+fun ListScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> Unit = {}, onActionButtonClick: () -> Unit = {}, onEditClick: (id: Int, name: String, website: String, password: String) -> Unit) {
     val listScreenViewModel = viewModel<ListScreenViewModel>()
 
     val coroutineScope = rememberCoroutineScope()
@@ -89,7 +89,8 @@ fun ListScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> Unit = {
                     onDeleteClick = {
                         showDialog = true
                         intIdToDialog = item.id
-                    })
+                    },
+                    onEditClick = onEditClick)
             }
 
         }
@@ -103,7 +104,7 @@ fun EntryItem(modifier: Modifier = Modifier,
               name: String,
               onClick: (id: Int) -> Unit = {},
               onDeleteClick: (id: Int) -> Unit = {},
-              onEditClick: (id: Int) -> Unit = {},
+              onEditClick: (id: Int, name: String, website: String, password: String) -> Unit,
               id: Int) {
 
     Card(modifier = modifier
@@ -113,7 +114,7 @@ fun EntryItem(modifier: Modifier = Modifier,
         Text(website, modifier = Modifier.padding(5.dp))
         PasswordText(modifier = Modifier.padding(5.dp), visible = false, text = password)
 
-        IconButton(onClick = { onEditClick(id) }) {
+        IconButton(onClick = { onEditClick(id, name, website, password) }) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.baseline_edit_24),
                 contentDescription = "Edit"
@@ -127,17 +128,6 @@ fun EntryItem(modifier: Modifier = Modifier,
             )
         }
     }
-}
-
-@Preview
-@Composable
-fun EntryItemPreview(modifier: Modifier = Modifier,
-              password: String = "default1234",
-              website: String = "default.website.com",
-              name: String = "Default name",
-              onClick: (id: Int) -> Unit = {},
-              id: Int = 0) {
-    EntryItem(password = password, website = website, name = name, id = 0, onClick = onClick)
 }
 
 @Composable

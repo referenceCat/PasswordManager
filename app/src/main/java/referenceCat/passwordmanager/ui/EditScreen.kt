@@ -16,22 +16,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import referenceCat.passwordmanager.R
 import androidx.compose.ui.tooling.preview.Preview
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import referenceCat.passwordmanager.backend.PasswordsStorage
 
 @Preview
 @Composable
-fun EntryEditScreen(modifier: Modifier = Modifier, onSave: () -> Unit = {}) {
+fun EditScreen(modifier: Modifier = Modifier, onSave: () -> Unit = {}, id: Int = 0, name: String = "", website: String = "", password: String = "") {
     val coroutineScope = rememberCoroutineScope()
 
-    var name by rememberSaveable {
-        mutableStateOf("")
+    var nameTextFieldValue by rememberSaveable {
+        mutableStateOf(name)
     }
-    var website by rememberSaveable {
-        mutableStateOf("")
+    var websiteTextFieldValue by rememberSaveable {
+        mutableStateOf(website)
     }
-    var password by rememberSaveable {
-        mutableStateOf("")
+    var passwordTextFieldValue by rememberSaveable {
+        mutableStateOf(password)
     }
     var errorMessage by rememberSaveable {
         mutableStateOf("")
@@ -40,15 +41,18 @@ fun EntryEditScreen(modifier: Modifier = Modifier, onSave: () -> Unit = {}) {
     val context: Context = LocalContext.current
     Column(modifier = modifier) {
         Text(stringResource(id = R.string.entryName))
-        TextField(value = name, onValueChange = {name = it})
+        TextField(value = nameTextFieldValue, onValueChange = {nameTextFieldValue = it})
         Text(stringResource(id = R.string.entryWebsite))
-        TextField(value = website, onValueChange = {website = it})
+        TextField(value = websiteTextFieldValue, onValueChange = {websiteTextFieldValue = it})
         Text(stringResource(id = R.string.entryPassword))
-        PasswordTextField(visible = false, label = "Password", value = password, onChange = {password = it})
+        PasswordTextField(visible = false, label = "Password", value = passwordTextFieldValue, onChange = {passwordTextFieldValue = it})
         Text(errorMessage)
         Button(onClick = {
-            coroutineScope.launch {
-                errorMessage = savePassword(context, name, website, password, onSave)?: ""
+            coroutineScope.launch() {
+                errorMessage = if (id == 0)
+                    savePassword(context, nameTextFieldValue, websiteTextFieldValue, passwordTextFieldValue, onSave)?: ""
+                else
+                    updatePassword(context, id, nameTextFieldValue, websiteTextFieldValue, passwordTextFieldValue, onSave)?: ""
             }
         }) {
             Text(text = stringResource(id = R.string.save))
@@ -63,5 +67,15 @@ suspend fun savePassword(context: Context, name: String, website: String, passwo
 
     PasswordsStorage.getInstance().insertPasswordData(context, name, website, password)
     onSave()
+    return null
+}
+
+suspend fun updatePassword(context: Context, id: Int, name: String, website: String, password: String, onUpdate: () -> Unit = {}): String? {
+    if (name == "" || website == "" || password == "") {
+        return context.resources.getString(R.string.errorInvalidFieldValue)
+    }
+
+    PasswordsStorage.getInstance().updatePasswordData(context, id, name, website, password)
+    onUpdate()
     return null
 }
