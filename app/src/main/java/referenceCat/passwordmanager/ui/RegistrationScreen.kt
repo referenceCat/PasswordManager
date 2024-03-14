@@ -65,6 +65,7 @@ fun tryRegister(context: Context, onSuccessfulRegistration: () -> Unit, password
     else {
         val result = PasswordsStorage.getInstance().initMasterPassword(context, password1)
         if (result != null) return result
+        PasswordsStorage.getInstance().applyMasterPassword(context, password1)
         onSuccessfulRegistration()
     }
     return null

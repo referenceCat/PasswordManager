@@ -189,4 +189,8 @@ class PasswordsStorage private constructor() {
         val (encryptedPassword, initVector) = encrypt(password)
         repository.updateItem(PasswordEntity(id, name, website, encryptedPassword, initVector))
     }
+
+    fun isMasterPasswordApplied(): Boolean {
+        return keySpec != null
+    }
 }

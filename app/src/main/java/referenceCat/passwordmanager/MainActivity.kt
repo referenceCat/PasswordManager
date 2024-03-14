@@ -2,6 +2,7 @@ package referenceCat.passwordmanager
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -54,6 +55,7 @@ class MainActivity : ComponentActivity() {
                 Application()
         }
     }
+
 }
 
 @Preview
@@ -76,10 +78,16 @@ fun Application (navController: NavHostController = rememberNavController()) {
                 )
         }
     ) { innerPadding ->
+        Log.d(null, "Nav start")
         NavHost(
+            modifier = Modifier.padding(innerPadding),
             navController = navController,
-            startDestination = if (PasswordsStorage.getInstance().isMasterPasswordInitiated(LocalContext.current)) Screen.LoginRoute.name else Screen.RegistrationRoute.name,
-            modifier = Modifier.padding(innerPadding)
+            startDestination = if (!PasswordsStorage.getInstance().isMasterPasswordInitiated(LocalContext.current))
+                Screen.RegistrationRoute.name
+            else if (!PasswordsStorage.getInstance().isMasterPasswordApplied() )
+                Screen.LoginRoute.name
+                    else
+                Screen.ListRoute.name
         ) {
             composable(route = Screen.RegistrationRoute.name) {
                 RegistrationScreen(onSuccessfulRegistration = {navController.navigate(Screen.ListRoute.name)})
