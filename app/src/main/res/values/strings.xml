@@ -16,4 +16,7 @@
     <string name="errorPasswordInit">Couldn\'t initialize master-password</string>
     <string name="save">Save</string>
     <string name="errorInvalidFieldValue">One or more fields are invalid</string>
+    <string name="website_label">Website:</string>
+    <string name="password_label">Password:</string>
+    <string name="notif_text_copied">Copied to clipboard</string>
 </resources>

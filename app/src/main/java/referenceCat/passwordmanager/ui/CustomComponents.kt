@@ -1,7 +1,14 @@
 package referenceCat.passwordmanager.ui
 
 import android.graphics.Typeface
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.FabPosition
@@ -30,6 +37,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 
@@ -95,10 +103,13 @@ fun PasswordText(visible: Boolean, modifier: Modifier = Modifier, text:String) {
     Row(modifier = modifier) {
         Text(
             text = if (passwordVisible) text else passwordMaskChar.toString().repeat(text.length),
-            modifier = modifier.align(Alignment.CenterVertically),
-            style = passwordTextStyle
+            modifier = Modifier.align(Alignment.CenterVertically).weight(1f, true),
+            style = passwordTextStyle,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
-        IconButton(onClick = { passwordVisible = !passwordVisible }, modifier.align(Alignment.CenterVertically)) {
+        IconButton(onClick = { passwordVisible = !passwordVisible },
+            Modifier.align(Alignment.CenterVertically).wrapContentWidth(Alignment.End)) {
             Icon(imageVector = image, description)
         }
     }
@@ -107,6 +118,6 @@ fun PasswordText(visible: Boolean, modifier: Modifier = Modifier, text:String) {
 @Preview
 @Composable
 fun PreviewPasswordText() {
-    PasswordText(visible = false, text = stringResource(id = R.string.defaultPassword), )
+    PasswordText(visible = false, text = "default1234ksjnnkjsnfsoknfiuhfdersryss", )
 }
 
