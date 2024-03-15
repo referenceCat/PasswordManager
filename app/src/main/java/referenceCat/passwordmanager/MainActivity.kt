@@ -35,7 +35,7 @@ import referenceCat.passwordmanager.ui.ListScreen
 import referenceCat.passwordmanager.ui.LoginScreen
 import referenceCat.passwordmanager.ui.RegistrationScreen
 
-enum class Screen(
+enum class Route(
     val showAppBar: Boolean = true,
     val canNavigateBack: Boolean = false,
     val titleStringId: Int = R.string.app_name
@@ -61,10 +61,10 @@ fun Application(navController: NavHostController = rememberNavController()) {
     val editScreenInitContentViewModel = viewModel<EditScreenInitContentViewModel>()
     val backStackEntry by navController.currentBackStackEntryAsState()
     navController.enableOnBackPressed(false)
-    val currentScreen = Screen.valueOf(
+    val currentScreen = Route.valueOf(
         backStackEntry?.destination?.route ?: if (PasswordsStorage.getInstance()
                 .isMasterPasswordInitiated(LocalContext.current)
-        ) Screen.LoginRoute.name else Screen.RegistrationRoute.name,
+        ) Route.LoginRoute.name else Route.RegistrationRoute.name,
     )
 
     Scaffold(
@@ -89,7 +89,7 @@ fun Application(navController: NavHostController = rememberNavController()) {
 @Composable
 fun ApplicationTopBar(
     modifier: Modifier = Modifier,
-    currentScreen: Screen,
+    currentScreen: Route,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
 ) {
@@ -121,28 +121,28 @@ fun ApplicationNavigation(
     navController: NavHostController,
     viewModel: EditScreenInitContentViewModel,
 ) {
-    var startDestination = Screen.RegistrationRoute.name
+    var startDestination = Route.RegistrationRoute.name
 
     if (PasswordsStorage.getInstance().isMasterPasswordInitiated(LocalContext.current))
-        startDestination = Screen.LoginRoute.name
+        startDestination = Route.LoginRoute.name
 
     if (PasswordsStorage.getInstance().isMasterPasswordApplied())
-        startDestination = Screen.ListRoute.name
+        startDestination = Route.ListRoute.name
 
     NavHost(
         modifier = modifier,
         navController = navController,
         startDestination = startDestination
     ) {
-        composable(route = Screen.RegistrationRoute.name) {
-            RegistrationScreen(onSuccessfulRegistration = { navController.navigate(Screen.ListRoute.name) })
+        composable(route = Route.RegistrationRoute.name) {
+            RegistrationScreen(onSuccessfulRegistration = { navController.navigate(Route.ListRoute.name) })
         }
 
-        composable(route = Screen.LoginRoute.name) {
-            LoginScreen(onSuccessfulLogin = { navController.navigate(Screen.ListRoute.name) })
+        composable(route = Route.LoginRoute.name) {
+            LoginScreen(onSuccessfulLogin = { navController.navigate(Route.ListRoute.name) })
         }
 
-        composable(route = Screen.ListRoute.name) {
+        composable(route = Route.ListRoute.name) {
             val activity = (LocalContext.current as? Activity)
             BackHandler(true) {
                 activity?.finish()
@@ -150,21 +150,21 @@ fun ApplicationNavigation(
             ListScreen(
                 onActionButtonClick = {
                     viewModel.clearData()
-                    navController.navigate(Screen.EntryEditRoute.name)
+                    navController.navigate(Route.EntryEditRoute.name)
                 },
                 onEditClick = { id: Int, name: String, website: String, password: String ->
                     viewModel.setData(id, name, website, password)
-                    navController.navigate(Screen.EntryEditRoute.name)
+                    navController.navigate(Route.EntryEditRoute.name)
                 }
             )
         }
 
-        composable(route = Screen.EntryEditRoute.name) {
+        composable(route = Route.EntryEditRoute.name) {
             EditScreen(id = viewModel.id.intValue,
                 name = viewModel.name.value,
                 website = viewModel.website.value,
                 password = viewModel.password.value,
-                onSave = { navController.navigate(Screen.ListRoute.name) })
+                onSave = { navController.navigate(Route.ListRoute.name) })
         }
     }
 }
