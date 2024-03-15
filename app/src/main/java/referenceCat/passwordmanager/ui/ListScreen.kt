@@ -95,8 +95,8 @@ fun ListScreen(
                 }
                 showDialog = false
             },
-            dialogTitle = "Delete password data?",
-            dialogText = "Password data deletion is irreversible action",
+            dialogTitle = stringResource(id = R.string.dialog_title),
+            dialogText = stringResource(id = R.string.dialog_text),
             icon = Icons.Filled.Delete
         )
     }
@@ -106,14 +106,18 @@ fun ListScreen(
             FloatingActionButton(onClick = onActionButtonClick) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Add"
+                    contentDescription = null
                 )
             }
         }) { innerPadding ->
         innerPadding// Scaffold doesn't have any padding but value must be used somewhere
 
         LazyColumn {
-            if (dataList.isEmpty()) item { Text("Password data will be displayed here") }
+            if (dataList.isEmpty()) item {
+                Text(
+                    stringResource(id = R.string.list_screen_no_passwords),
+                    Modifier.padding(dimensionResource(id = R.dimen.padding_small)))
+            }
             items(dataList.size) {
                 val item = dataList.get(index = it) // TODOs
                 EntryItem(
@@ -134,6 +138,8 @@ fun ListScreen(
                     onEditClick = onEditClick
                 )
             }
+
+            item { Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_small))) }
 
         }
     }
@@ -315,7 +321,7 @@ fun ConfirmCancelDialog(
 ) {
     AlertDialog(
         icon = {
-            Icon(icon, contentDescription = "Example Icon")
+            Icon(icon, contentDescription = null)
         },
         title = {
             Text(text = dialogTitle)
@@ -341,7 +347,7 @@ fun ConfirmCancelDialog(
                     onDismissRequest()
                 }
             ) {
-                Text("Dismiss")
+                Text("Cancel")
             }
         }
     )

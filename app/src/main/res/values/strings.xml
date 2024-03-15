@@ -20,4 +20,7 @@
     <string name="password_label">Password:</string>
     <string name="notif_text_copied">Copied to clipboard</string>
     <string name="list_screen_title">Your passwords:</string>
+    <string name="list_screen_no_passwords">Password data will be displayed here. Click \"+\" to add data.</string>
+    <string name="dialog_title">Delete password data?</string>
+    <string name="dialog_text">Password data deletion is irreversible action</string>
 </resources>
