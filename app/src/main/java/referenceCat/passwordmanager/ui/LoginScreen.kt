@@ -8,13 +8,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -26,23 +30,57 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import referenceCat.passwordmanager.R
 import referenceCat.passwordmanager.backend.PasswordsStorage
 
 @Preview
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier, onSuccessfulLogin: () -> Unit = {}) {
+fun LoginScreen(modifier: Modifier = Modifier, onSuccessfulLogin: () -> Unit = {}, onClearData: () -> Unit = {},) {
     val context = LocalContext.current
     var showBiometricPrompt by rememberSaveable { mutableStateOf(false) }
+    var showClearDataDialog by rememberSaveable { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
 
     Box(contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize()
     ) {
-        LoginForm(
-            modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_medium)),
-            onLoginButtonClick = {
-                return@LoginForm tryLogin(context, onSuccessfulLogin, it) ?: ""
-            })
+        Column {
+            LoginForm(
+                modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_medium)),
+                onLoginButtonClick = {
+                    return@LoginForm tryLogin(context, onSuccessfulLogin, it) ?: ""
+                })
+
+            // Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_small)))
+
+            TextButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { showClearDataDialog = true }
+            ) {
+                Text(stringResource(id = R.string.clear_all_data))
+            }
+        }
+
+
+        if (showClearDataDialog) {
+            ConfirmCancelDialog(
+                onDismissRequest = { showClearDataDialog = false},
+                onConfirmation = {
+                    showClearDataDialog = false
+                    coroutineScope.launch(Dispatchers.IO) {
+                        PasswordsStorage.getInstance().cleanAllData(context)
+                    }
+                    onClearData()
+                },
+                dialogTitle = stringResource(id = R.string.clear_all_data_dialog_title),
+                dialogText = stringResource(id = R.string.clear_all_data_dialog_text),
+                icon = Icons.Filled.Warning
+            )
+        }
+
 
         if (PasswordsStorage.getInstance().isBiometricAuthInitiated(context)) {
             IconButton(modifier = Modifier

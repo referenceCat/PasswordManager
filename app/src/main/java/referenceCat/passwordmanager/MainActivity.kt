@@ -146,7 +146,10 @@ fun ApplicationNavigation(
         }
 
         composable(route = Route.LoginRoute.name) {
-            LoginScreen(onSuccessfulLogin = { navController.navigate(Route.ListRoute.name) })
+            LoginScreen(
+                onSuccessfulLogin = { navController.navigate(Route.ListRoute.name) },
+                onClearData = {navController.navigate(Route.RegistrationRoute.name)}
+            )
         }
 
         composable(route = Route.ListRoute.name) {

@@ -27,4 +27,7 @@ abstract class PasswordEntityDao {
 
     @Query("SELECT * FROM passwords")
     abstract fun getAllItems(): Flow<List<PasswordEntity>>
+
+    @Query("DELETE FROM passwords")
+    abstract fun deleteAll()
 }

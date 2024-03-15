@@ -38,4 +38,8 @@
     <string name="encrypted_master_password">encrypted_master_password\n</string>
     <string name="encrypted_master_password_iv">encrypted_master_password_iv</string>
     <string name="biometric_key">biometric_key</string>
+    <string name="clear_all_data">Forgot your password?</string>
+    <string name="clear_all_data_dialog_title">Clear all application data?</string>
+    <string name="clear_all_data_dialog_text">All your data would be cleared and you would be able to create new master-password</string>
+    <string name="pref_file_name">pref_file_name</string>
 </resources>

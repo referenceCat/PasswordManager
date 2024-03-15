@@ -13,4 +13,6 @@ class OfflinePasswordsRepository(private val itemDao: PasswordEntityDao) : Passw
     override suspend fun updateItem(item: PasswordEntity) = itemDao.update(item)
 
     override suspend fun deleteById(id: Int) = itemDao.deleteById(id)
+
+    override suspend fun deleteAll() = itemDao.deleteAll()
 }

@@ -41,9 +41,6 @@ class PasswordsStorage private constructor() {
 
     // private var keySpec: SecretKeySpec? = null
     private var masterPassword: String? = null
-
-    private val decryptedPasswordsData: MutableList<DecryptedPasswordData> = mutableListOf()
-
     private val tag = "referenceCat.passwordmanager.cryptography"
 
     init {
@@ -106,7 +103,7 @@ class PasswordsStorage private constructor() {
 
     fun isMasterPasswordInitiated(context: Context): Boolean {
         val sharedPref = context.getSharedPreferences(
-            context.resources.getString(R.string.key_master_passoword_digest),
+            context.resources.getString(R.string.pref_file_name),
             Context.MODE_PRIVATE
         )
 
@@ -122,7 +119,7 @@ class PasswordsStorage private constructor() {
         if (!isMasterPasswordInitiated(context)) return "Master-password isn't initiated"
 
         val sharedPref = context.getSharedPreferences(
-            context.resources.getString(R.string.key_master_passoword_digest),
+            context.resources.getString(R.string.pref_file_name),
             Context.MODE_PRIVATE
         )
         val passwordDigestOnDisk: String = sharedPref.getString(
@@ -140,7 +137,7 @@ class PasswordsStorage private constructor() {
     fun initMasterPassword(context: Context, password: String): String? {
         if (isMasterPasswordInitiated(context)) return "Master-password is already initiated"
         val sharedPref = context.getSharedPreferences(
-            context.resources.getString(R.string.key_master_passoword_digest),
+            context.resources.getString(R.string.pref_file_name),
             Context.MODE_PRIVATE
         )
 
@@ -195,7 +192,7 @@ class PasswordsStorage private constructor() {
 
     fun isBiometricAuthInitiated(context: Context): Boolean {
         val sharedPref = context.getSharedPreferences(
-            context.resources.getString(R.string.encrypted_master_password),
+            context.resources.getString(R.string.pref_file_name),
             Context.MODE_PRIVATE
         )
 
@@ -214,7 +211,7 @@ class PasswordsStorage private constructor() {
     fun getCipherToApplyBiometricAuth(context: Context): Cipher {
         // assert(!isBiometricAuthInitiated(context))
         val sharedPref = context.getSharedPreferences(
-            context.resources.getString(R.string.encrypted_master_password_iv),
+            context.resources.getString(R.string.pref_file_name),
             Context.MODE_PRIVATE
         )
         val encryptedMasterPasswordIv: String = requireNotNull( sharedPref.getString(context.resources.getString(R.string.encrypted_master_password_iv), null))
@@ -222,7 +219,7 @@ class PasswordsStorage private constructor() {
     }
     fun initBiometricAuth(context: Context, initialisedCipher: Cipher){
         val sharedPref = context.getSharedPreferences(
-            context.resources.getString(R.string.encrypted_master_password),
+            context.resources.getString(R.string.pref_file_name),
             Context.MODE_PRIVATE
         )
 
@@ -235,7 +232,7 @@ class PasswordsStorage private constructor() {
         }
 
         val sharedPref2 = context.getSharedPreferences(
-            context.resources.getString(R.string.encrypted_master_password_iv),
+            context.resources.getString(R.string.pref_file_name),
             Context.MODE_PRIVATE
         )
 
@@ -251,7 +248,7 @@ class PasswordsStorage private constructor() {
     fun applyBiometricAuth(context: Context, initialisedCipher: Cipher): Boolean {
         assert(isBiometricAuthInitiated(context))
         val sharedPref = context.getSharedPreferences(
-            context.resources.getString(R.string.encrypted_master_password),
+            context.resources.getString(R.string.pref_file_name),
             Context.MODE_PRIVATE
         )
         val encryptedMasterPassword = requireNotNull( sharedPref.getString(context.resources.getString(R.string.encrypted_master_password), null))
@@ -262,8 +259,9 @@ class PasswordsStorage private constructor() {
         return applyMasterPassword(context, decryptedMasterPassword) == null
     }
 
-    fun cleanAllData(context: Context) {
-        context.getSharedPreferences("YOUR_PREFS", 0).edit().clear().apply();
-        val repository: PasswordsRepository = OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
+    suspend fun cleanAllData(context: Context) {
+        masterPassword = null
+        context.getSharedPreferences(context.resources.getString(R.string.pref_file_name), 0).edit().clear().apply();
+        OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao()).deleteAll()
     }
 }
