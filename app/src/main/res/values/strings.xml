@@ -19,4 +19,5 @@
     <string name="website_label">Website:</string>
     <string name="password_label">Password:</string>
     <string name="notif_text_copied">Copied to clipboard</string>
+    <string name="list_screen_title">Your passwords:</string>
 </resources>

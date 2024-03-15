@@ -38,10 +38,11 @@ import referenceCat.passwordmanager.ui.RegistrationScreen
 enum class Screen(
     val showAppBar: Boolean = true,
     val canNavigateBack: Boolean = false,
+    val titleStringId: Int = R.string.app_name
 ) {
     RegistrationRoute(showAppBar = false),
     LoginRoute(showAppBar = false),
-    ListRoute(),
+    ListRoute(titleStringId = R.string.list_screen_title),
     EntryEditRoute(canNavigateBack = true),
 }
 
@@ -94,7 +95,7 @@ fun ApplicationTopBar(
 ) {
     if (currentScreen.showAppBar) {
         TopAppBar(
-            title = { Text(stringResource(id = R.string.app_name)) },
+            title = { Text(stringResource(id = currentScreen.titleStringId)) },
             colors = TopAppBarDefaults.mediumTopAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             ),
