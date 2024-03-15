@@ -43,7 +43,7 @@ enum class Screen(
     RegistrationRoute(showAppBar = false),
     LoginRoute(showAppBar = false),
     ListRoute(titleStringId = R.string.list_screen_title),
-    EntryEditRoute(canNavigateBack = true),
+    EntryEditRoute(canNavigateBack = true, titleStringId = R.string.edit_screen_title),
 }
 
 class MainActivity : ComponentActivity() {
