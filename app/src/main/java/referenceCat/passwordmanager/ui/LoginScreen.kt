@@ -19,6 +19,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
@@ -77,9 +78,13 @@ fun LoginForm(modifier: Modifier = Modifier,
             visible = false,
             label = stringResource(id = R.string.enter_master_password_text_field),
             value = password,
-            onChange = { password = it })
+            onChange = {
+                password = it
+                errorMessageText = ""
+            }
+        )
 
-        Text(errorMessageText)
+        Text(errorMessageText, color = Color.Red)
 
         Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_small)))
 

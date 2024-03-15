@@ -46,7 +46,7 @@ val passwordTextStyle = TextStyle(
 const val passwordMaskChar = '*'
 
 @Composable
-fun PasswordTextField(visible: Boolean, modifier: Modifier = Modifier, label: String, editable: Boolean = true, value: String = "", onChange: (String) -> Unit = {}) {
+fun PasswordTextField(visible: Boolean, modifier: Modifier = Modifier, label: String, editable: Boolean = true, value: String = "", onChange: (String) -> Unit = {}, invalidData:Boolean = false) {
     // var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(visible) }
 

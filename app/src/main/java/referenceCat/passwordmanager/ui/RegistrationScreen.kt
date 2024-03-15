@@ -18,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -80,7 +81,7 @@ fun MasterPasswordRegistrationForm(
             }
         )
 
-        Text(errorMessageText1)
+        Text(errorMessageText1, color = Color.Red)
         Spacer(Modifier.size(dimensionResource(id = R.dimen.padding_small)))
 
         //Text(stringResource(id = R.string.createMasterPassword))
@@ -93,7 +94,7 @@ fun MasterPasswordRegistrationForm(
                 errorMessageText2 = if (password1 != password2) context.resources.getString(R.string.error_passwords_are_not_equal) else ""
             })
 
-        Text(errorMessageText2)
+        Text(errorMessageText2, color = Color.Red)
 
         Spacer(Modifier.size(dimensionResource(id = R.dimen.padding_small)))
 
