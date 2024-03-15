@@ -23,4 +23,10 @@
     <string name="list_screen_no_passwords">Password data will be displayed here. Click \"+\" to add data.</string>
     <string name="dialog_title">Delete password data?</string>
     <string name="dialog_text">Password data deletion is irreversible action</string>
+    <string name="name_text_field">name*</string>
+    <string name="name">name*</string>
+    <string name="error_empty_field">This field is necessary</string>
+    <string name="website">website*</string>
+    <string name="website_text_field">website*</string>
+    <string name="password_text_field">password*</string>
 </resources>

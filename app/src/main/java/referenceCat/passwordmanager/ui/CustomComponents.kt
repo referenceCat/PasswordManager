@@ -1,8 +1,13 @@
 package referenceCat.passwordmanager.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.Typeface
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +37,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -40,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 
 
 val passwordTextStyle = TextStyle(
@@ -103,13 +110,17 @@ fun PasswordText(visible: Boolean, modifier: Modifier = Modifier, text:String) {
     Row(modifier = modifier) {
         Text(
             text = if (passwordVisible) text else passwordMaskChar.toString().repeat(text.length),
-            modifier = Modifier.align(Alignment.CenterVertically).weight(1f, true),
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .weight(1f, true),
             style = passwordTextStyle,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
         IconButton(onClick = { passwordVisible = !passwordVisible },
-            Modifier.align(Alignment.CenterVertically).wrapContentWidth(Alignment.End)) {
+            Modifier
+                .align(Alignment.CenterVertically)
+                .wrapContentWidth(Alignment.End)) {
             Icon(imageVector = image, description)
         }
     }
@@ -121,3 +132,25 @@ fun PreviewPasswordText() {
     PasswordText(visible = false, text = "default1234ksjnnkjsnfsoknfiuhfdersryss", )
 }
 
+fun copyToClipBoard(text: String, context: Context) {
+    val clipboard: ClipboardManager =
+        ContextCompat.getSystemService(context, ClipboardManager::class.java) as ClipboardManager
+    val clip = ClipData.newPlainText(null, text)
+    clipboard.setPrimaryClip(clip)
+    Toast.makeText(
+        context,
+        context.resources.getString(R.string.notif_text_copied),
+        Toast.LENGTH_SHORT
+    ).show()
+}
+
+@Composable
+fun CopyButton(text: String, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    IconButton(onClick = { copyToClipBoard(text, context) }) {
+        Icon(
+            imageVector = ImageVector.vectorResource(R.drawable.baseline_content_copy_24),
+            contentDescription = null
+        )
+    }
+}

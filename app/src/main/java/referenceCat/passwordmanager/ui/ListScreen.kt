@@ -287,29 +287,6 @@ fun EntryItemPreviewLargeText() {
     )
 }
 
-fun copyToClipBoard(text: String, context: Context) {
-    val clipboard: ClipboardManager =
-        getSystemService(context, ClipboardManager::class.java) as ClipboardManager
-    val clip = ClipData.newPlainText(null, text)
-    clipboard.setPrimaryClip(clip)
-    Toast.makeText(
-        context,
-        context.resources.getString(R.string.notif_text_copied),
-        Toast.LENGTH_SHORT
-    ).show()
-}
-
-@Composable
-fun CopyButton(text: String, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    IconButton(onClick = { copyToClipBoard(text, context) }) {
-        Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.baseline_content_copy_24),
-            contentDescription = null
-        )
-    }
-}
-
 
 @Composable
 fun ConfirmCancelDialog(
