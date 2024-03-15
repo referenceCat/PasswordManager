@@ -123,7 +123,7 @@ fun ApplicationNavigation(
     var startDestination = Screen.RegistrationRoute.name
 
     if (PasswordsStorage.getInstance().isMasterPasswordInitiated(LocalContext.current))
-        startDestination = Screen.RegistrationRoute.name
+        startDestination = Screen.LoginRoute.name
 
     if (PasswordsStorage.getInstance().isMasterPasswordApplied())
         startDestination = Screen.ListRoute.name
