@@ -1,6 +1,8 @@
 package referenceCat.passwordmanager.backend
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import referenceCat.passwordmanager.R
@@ -37,7 +39,8 @@ class PasswordsStorage private constructor() {
             }
     }
 
-    private var keySpec: SecretKeySpec? = null
+    // private var keySpec: SecretKeySpec? = null
+    private var masterPassword: String? = null
 
     private val decryptedPasswordsData: MutableList<DecryptedPasswordData> = mutableListOf()
 
@@ -50,42 +53,38 @@ class PasswordsStorage private constructor() {
     }
 
 
-    private fun generateEncryptionKey(password: String) {
+    private fun generateEncryptionKey(text: String): SecretKeySpec {
         val pbKeySpec =
-            PBEKeySpec(password.toCharArray(), stringToByteArray("encryption key salt"), 1324, 256)
+            PBEKeySpec(text.toCharArray(), stringToByteArray("encryption key salt"), 1324, 256)
         val secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
         val keyBytes = secretKeyFactory.generateSecret(pbKeySpec).encoded
-        keySpec = SecretKeySpec(keyBytes, "AES")
+        return SecretKeySpec(keyBytes, "AES")
     }
 
-    private fun encrypt(plaintext: String): Pair<String, String> {
-        assert(keySpec != null) { "can't encrypt without key" }
+    private fun getCipher(): Cipher {
+        return Cipher.getInstance("AES/CBC/PKCS5PADDING")
+    }
 
-        // Log.d(tag, "encrypt: $plaintext")
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
+    private fun encrypt(plaintext: String, key: String): Pair<String, String> {
+        val keySpec: SecretKeySpec = generateEncryptionKey(key)
+        val cipher = getCipher()
         cipher.init(Cipher.ENCRYPT_MODE, keySpec)
         val encryptedTextBytes = cipher.doFinal(stringToByteArray(plaintext))
         val encryptedText: String = byteArrayToString(encryptedTextBytes)
         val ivBytes = cipher.iv
         val iv: String = byteArrayToString(ivBytes)
-        // Log.d(tag, "result: $encryptedText, iv: $iv")
-        // Log.d(tag, "bytes: ${encryptedTextBytes.contentToString()}, iv: ${ivBytes.contentToString()}")
         return Pair(encryptedText, iv)
     }
 
-    private fun decrypt(cipherText: String, initVector: String): String {
-        assert(keySpec != null) { "can't decrypt without key" }
-        // Log.d(tag, "decrypt: $cipherText, iv: $initVector")
-
+    private fun decrypt(cipherText: String, initVector: String, key: String): String {
+        val keySpec: SecretKeySpec = generateEncryptionKey(key)
         val ivBytes = stringToByteArray(initVector)
         val cipherTextBytes = stringToByteArray(cipherText)
-        // Log.d(tag, "bytes: ${cipherTextBytes.contentToString()}, iv: ${ivBytes.contentToString()}")
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
+        val cipher = getCipher()
         val ivSpec = IvParameterSpec(ivBytes)
         cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec)
         val decryptedTextBytes = cipher.doFinal(cipherTextBytes)
         val decryptedText = byteArrayToString(decryptedTextBytes)
-        // Log.d(tag, "result: $decryptedText")
         return decryptedText
     }
 
@@ -134,7 +133,7 @@ class PasswordsStorage private constructor() {
         val passwordDigestFromUser = digestMessage(password)
 
         if (passwordDigestFromUser != passwordDigestOnDisk) return "Incorrect password."
-        generateEncryptionKey(password)
+        masterPassword = password
         return null
     }
 
@@ -152,7 +151,7 @@ class PasswordsStorage private constructor() {
             )
             commit()
         }
-        generateEncryptionKey(password)
+        masterPassword = password
         return null
     }
 
@@ -165,7 +164,7 @@ class PasswordsStorage private constructor() {
                     it.id,
                     it.name,
                     it.website,
-                    decrypt(it.encryptedPassword, it.initVector)
+                    decrypt(it.encryptedPassword, it.initVector, requireNotNull(masterPassword))
                 )
             }
         }
@@ -174,7 +173,7 @@ class PasswordsStorage private constructor() {
     suspend fun insertPasswordData(context: Context, name: String, website: String, password: String) {
         val repository: PasswordsRepository =
             OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
-        val (encryptedPassword, initVector) = encrypt(password)
+        val (encryptedPassword, initVector) = encrypt(password, requireNotNull(masterPassword))
         repository.insertItem(PasswordEntity(0, name, website, encryptedPassword, initVector))
     }
 
@@ -186,11 +185,85 @@ class PasswordsStorage private constructor() {
     suspend fun updatePasswordData(context: Context, id: Int, name: String, website: String, password: String) {
         val repository: PasswordsRepository =
             OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
-        val (encryptedPassword, initVector) = encrypt(password)
+        val (encryptedPassword, initVector) = encrypt(password, requireNotNull(masterPassword))
         repository.updateItem(PasswordEntity(id, name, website, encryptedPassword, initVector))
     }
 
     fun isMasterPasswordApplied(): Boolean {
-        return keySpec != null
+        return masterPassword != null
+    }
+
+    fun isBiometricAuthInitiated(context: Context): Boolean {
+        val sharedPref = context.getSharedPreferences(
+            context.resources.getString(R.string.encrypted_master_password),
+            Context.MODE_PRIVATE
+        )
+
+        sharedPref.getString(
+            context.resources.getString(R.string.encrypted_master_password),
+            null
+        ) ?: return false
+        return true
+    }
+
+    fun getCipherToInitBiometricAuth(context: Context): Cipher {
+        // assert(!isBiometricAuthInitiated(context))
+        return getInitializedCipherForEncryption( context.resources.getString(R.string.biometric_key) )
+    }
+
+    fun getCipherToApplyBiometricAuth(context: Context): Cipher {
+        // assert(!isBiometricAuthInitiated(context))
+        val sharedPref = context.getSharedPreferences(
+            context.resources.getString(R.string.encrypted_master_password_iv),
+            Context.MODE_PRIVATE
+        )
+        val encryptedMasterPasswordIv: String = requireNotNull( sharedPref.getString(context.resources.getString(R.string.encrypted_master_password_iv), null))
+        return getInitializedCipherForDecryption( context.resources.getString(R.string.biometric_key), stringToByteArray(encryptedMasterPasswordIv))
+    }
+    fun initBiometricAuth(context: Context, initialisedCipher: Cipher){
+        val sharedPref = context.getSharedPreferences(
+            context.resources.getString(R.string.encrypted_master_password),
+            Context.MODE_PRIVATE
+        )
+
+        with(sharedPref.edit()) {
+            putString(
+                context.resources.getString(R.string.encrypted_master_password),
+                byteArrayToString(initialisedCipher.doFinal(stringToByteArray(requireNotNull(masterPassword))))
+            )
+            commit()
+        }
+
+        val sharedPref2 = context.getSharedPreferences(
+            context.resources.getString(R.string.encrypted_master_password_iv),
+            Context.MODE_PRIVATE
+        )
+
+        with(sharedPref2.edit()) {
+            putString(
+                context.resources.getString(R.string.encrypted_master_password_iv),
+                byteArrayToString(initialisedCipher.iv)
+            )
+            commit()
+        }
+    }
+
+    fun applyBiometricAuth(context: Context, initialisedCipher: Cipher): Boolean {
+        assert(isBiometricAuthInitiated(context))
+        val sharedPref = context.getSharedPreferences(
+            context.resources.getString(R.string.encrypted_master_password),
+            Context.MODE_PRIVATE
+        )
+        val encryptedMasterPassword = requireNotNull( sharedPref.getString(context.resources.getString(R.string.encrypted_master_password), null))
+        val decryptedMasterPassword = byteArrayToString(initialisedCipher.doFinal(stringToByteArray(encryptedMasterPassword)))
+
+        // Log.d(null, "Password: $decryptedMasterPassword")
+
+        return applyMasterPassword(context, decryptedMasterPassword) == null
+    }
+
+    fun cleanAllData(context: Context) {
+        context.getSharedPreferences("YOUR_PREFS", 0).edit().clear().apply();
+        val repository: PasswordsRepository = OfflinePasswordsRepository(PasswordsDatabase.getDatabase(context).passwordEntityDao())
     }
 }

@@ -33,6 +33,7 @@ import referenceCat.passwordmanager.backend.PasswordsStorage
 @Composable
 fun LoginScreen(modifier: Modifier = Modifier, onSuccessfulLogin: () -> Unit = {}) {
     val context = LocalContext.current
+    var showBiometricPrompt by rememberSaveable { mutableStateOf(false) }
 
     Box(contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize()
@@ -43,14 +44,26 @@ fun LoginScreen(modifier: Modifier = Modifier, onSuccessfulLogin: () -> Unit = {
                 return@LoginForm tryLogin(context, onSuccessfulLogin, it) ?: ""
             })
 
-        IconButton(modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .padding(dimensionResource(id = R.dimen.padding_medium))
-            .size(dimensionResource(id = R.dimen.fingerprint_button_size)),
-            onClick = { /*TODO*/ }
-        ) {
-            Icon(imageVector = ImageVector.vectorResource(id = R.drawable.baseline_fingerprint_48),
-                contentDescription = "fingerprint button")
+        if (PasswordsStorage.getInstance().isBiometricAuthInitiated(context)) {
+            IconButton(modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(dimensionResource(id = R.dimen.padding_medium))
+                .size(dimensionResource(id = R.dimen.fingerprint_button_size)),
+                onClick = {showBiometricPrompt = true}
+            ) {
+                Icon(imageVector = ImageVector.vectorResource(id = R.drawable.baseline_fingerprint_48),
+                    contentDescription = "fingerprint button")
+            }
+
+            BiometricPrompt(
+                show = showBiometricPrompt,
+                onDismiss = {showBiometricPrompt = false},
+                onSuccessfulAuthentication = {
+                    showBiometricPrompt = false;
+                    if (PasswordsStorage.getInstance().applyBiometricAuth(context, it)) onSuccessfulLogin()},
+                encryptionMode = false,
+                cipher = PasswordsStorage.getInstance().getCipherToApplyBiometricAuth(context)
+            )
         }
     }
 

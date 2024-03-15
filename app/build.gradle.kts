@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "referenceCat.passwordmanager"
-        minSdk = 24
+        minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -73,8 +73,5 @@ dependencies {
     implementation("androidx.room:room-ktx:$room_version")
 
     implementation("androidx.compose.runtime:runtime-livedata")
-
-
-
-
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
 }

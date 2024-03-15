@@ -1,9 +1,6 @@
 package referenceCat.passwordmanager.ui
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.widget.Toast
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,11 +14,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -80,6 +80,8 @@ fun ListScreen(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    var showBiometricPrompt by rememberSaveable { mutableStateOf(false) }
+
     val dataList: List<DecryptedPasswordData> by listScreenViewModel.passwords.observeAsState(
         initial = listOf()
     )
@@ -110,9 +112,19 @@ fun ListScreen(
                 )
             }
         }) { innerPadding ->
-        innerPadding// Scaffold doesn't have any padding but value must be used somewhere
+        innerPadding // Scaffold doesn't have any padding but value must be used somewhere
 
         LazyColumn {
+            if (!PasswordsStorage.getInstance().isBiometricAuthInitiated(context)) item {
+                RequestToEnableBiometricsCard(
+                    modifier = Modifier.padding(
+                        top = dimensionResource(id = R.dimen.padding_small),
+                        start = dimensionResource(id = R.dimen.padding_small),
+                        end = dimensionResource(id = R.dimen.padding_small),
+                    ),
+                    onClick = {showBiometricPrompt = true}
+                )
+            }
             if (dataList.isEmpty()) item {
                 Text(
                     stringResource(id = R.string.list_screen_no_passwords),
@@ -143,6 +155,15 @@ fun ListScreen(
 
         }
     }
+
+    BiometricPrompt(show = showBiometricPrompt,
+        onDismiss = { showBiometricPrompt = false },
+        onSuccessfulAuthentication = {
+            showBiometricPrompt = false
+            PasswordsStorage.getInstance().initBiometricAuth(context, it)
+        },
+        encryptionMode = true,
+        cipher = PasswordsStorage.getInstance().getCipherToInitBiometricAuth(context))
 }
 
 @Composable
@@ -328,4 +349,30 @@ fun ConfirmCancelDialog(
             }
         }
     )
+}
+
+@Preview
+@Composable
+fun RequestToEnableBiometricsCard(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
+    val context = LocalContext.current
+    Card(modifier = modifier.fillMaxWidth(1f),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        ),
+        ) {
+        Column(modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_small))) {
+            Text(text = stringResource(id = R.string.enable_biometrics_card_title), style = cardTitleTextStyle)
+            Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_very_small)))
+            Text(text = stringResource(id = R.string.enable_biometrics_card_text))
+            Spacer(modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_small)))
+            Button(onClick = onClick) {
+                Text(text = stringResource(id = R.string.enable_biometrics_card_button_text))
+            }
+        }
+    }
+
+
 }
