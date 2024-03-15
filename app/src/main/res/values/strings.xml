@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Password Manager</string>
     <string name="back_button">Back</string>
-    <string name="enterMasterPassword">Enter master-password:</string>
+    <string name="enter_master_password_text_field">Enter master-password</string>
     <string name="create_master_password_description">Master-password is the only data required to access all of your passwords. Remember it!</string>
     <string name="create_master_password_text_field">Create master-password</string>
     <string name="repeat_master_password_text_field">Repeat master-password</string>
