@@ -26,8 +26,7 @@
     <string name="name_text_field">name*</string>
     <string name="name">name*</string>
     <string name="error_empty_field">This field is necessary</string>
-    <string name="website">website*</string>
-    <string name="website_text_field">website*</string>
+    <string name="website_text_field">url*</string>
     <string name="password_text_field">password*</string>
     <string name="edit_screen_title">Edit password data:</string>
     <string name="cancel">cancel</string>

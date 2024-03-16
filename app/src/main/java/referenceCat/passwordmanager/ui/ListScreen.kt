@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import referenceCat.passwordmanager.R
@@ -184,7 +185,7 @@ fun EntryItem(
     ) {
         EntryNameRow(
             modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_small)),
-            icon = null,
+            website = website,
             text = name,
             onEditClick = { onEditClick(id, name, website, password) },
             onDeleteClick = { onDeleteClick(id) }
@@ -211,20 +212,22 @@ fun EntryItem(
 @Composable
 fun EntryNameRow(
     modifier: Modifier = Modifier,
-    icon: ImageBitmap?,
+    website: String = "",
     text: String,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     Row(modifier = modifier) {
-        Image(
-            icon ?: ImageBitmap.imageResource(R.drawable.placeholder),
+
+        AsyncImage(
+            model = getFaviconURL(website),
             contentDescription = null,
             modifier = Modifier
                 .size(dimensionResource(id = R.dimen.item_icon_size))
                 .clip(RoundedCornerShape(20))
                 .align(Alignment.CenterVertically)
         )
+
 
         Text(
             text = text,
@@ -254,6 +257,14 @@ fun EntryNameRow(
     }
 }
 
+fun getFaviconURL(url: String, default: String = ""): String {
+    return try {
+        url.substring(0, url.indexOf('/', 10)) + "/favicon.ico"
+    } catch (ex: Exception) {
+        default
+    }
+
+}
 @Composable
 fun EntryWebsiteRow(modifier: Modifier = Modifier, website: String) {
     Row(modifier = modifier) {
