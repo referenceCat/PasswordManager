@@ -179,7 +179,6 @@ fun EntryItem(
     onEditClick: (id: Int, name: String, website: String, password: String) -> Unit = { id: Int, name: String, website: String, password: String -> null },
     id: Int
 ) {
-
     Card(
         modifier = modifier.fillMaxWidth(1f)
     ) {
@@ -217,16 +216,21 @@ fun EntryNameRow(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
+    var showIcon by rememberSaveable { mutableStateOf(true) }
     Row(modifier = modifier) {
 
-        AsyncImage(
-            model = getFaviconURL(website),
-            contentDescription = null,
-            modifier = Modifier
-                .size(dimensionResource(id = R.dimen.item_icon_size))
-                .clip(RoundedCornerShape(20))
-                .align(Alignment.CenterVertically)
-        )
+        if (showIcon) {
+            AsyncImage(
+                model = getFaviconURL(website),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(dimensionResource(id = R.dimen.item_icon_size))
+                    .clip(RoundedCornerShape(20))
+                    .align(Alignment.CenterVertically),
+                onError = {showIcon = false}
+            )
+        }
+
 
 
         Text(
